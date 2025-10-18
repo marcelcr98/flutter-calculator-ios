@@ -1,9 +1,9 @@
-import 'package:calculadora_1/widgets/CalcButton.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'widgets/CalcButton.dart';
 
-void main(List<String> args) {
+void main() {
   runApp(const CalcApp());
 }
 
@@ -15,137 +15,201 @@ class CalcApp extends StatefulWidget {
 }
 
 class _CalcAppState extends State<CalcApp> {
-
   String _history = "";
-  String _expression="";
+  String _expression = "";
 
-    void clear(String text) {
+  void clear(String text) {
     setState(() {
-      _expression="";
+      _expression = "";
     });
   }
+
 
   void allClear(String text) {
     setState(() {
       _history = "";
-      _expression="";
+      _expression = "";
     });
   }
 
-  void evaluate(String text){
+void evaluate(String text) {
+  try {
+    // Solo corregimos el símbolo de multiplicación visual
+    String finalExpression = _expression.replaceAll('X', '*');
+
     Parser p = Parser();
-    Expression exp = p.parse(_expression);
+    Expression exp = p.parse(finalExpression);
     ContextModel cm = ContextModel();
 
     setState(() {
       _history = _expression;
       _expression = exp.evaluate(EvaluationType.REAL, cm).toString();
     });
-  }
-
-  void numClick(String text){
+  } catch (e) {
     setState(() {
-      _expression += text;
+      _expression = "Error";
     });
   }
+}
+
+
+
+void numClick(String text) {
+  setState(() {
+    if (text == "X") {
+      _expression += "*";
+    } else if (text == "÷") {
+      _expression += "/";
+    } else if (text == "−") {
+      _expression += "-";
+    } else {
+      _expression += text;
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Calculadora",
+      title: "Calculadora iOS Style",
       home: Scaffold(
-        backgroundColor: Color(0xFF283637),
-        body: Container(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Container(
-                alignment: const Alignment(1.0, 1.0),
-                child: Padding(
-                  padding: EdgeInsets.only(right: 12),
-                  child: Text(
-                    _history,
-                    style: GoogleFonts.rubik(
-                      textStyle: const TextStyle(
-                        fontSize: 24,
-                        color: Color(0xFF545F61),
+        backgroundColor: const Color(0xFF000000),
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Tamaño dinámico: más grande y adaptable
+              final buttonHeight = constraints.maxHeight * 0.11;
+              final buttonWidth = (constraints.maxWidth - 60) / 4;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // Texto historial
+                    Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Text(
+                        _history,
+                        style: GoogleFonts.rubik(
+                          textStyle: const TextStyle(
+                            fontSize: 28,
+                            color: Color(0xFF868686),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
+                    const SizedBox(height: 10),
 
-              Container(
-                alignment: const Alignment(1.0, 1.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: (Text(
-                    _expression,
-                    style: GoogleFonts.rubik(
-                      textStyle: const TextStyle(
-                        fontSize: 48,
-                        color: Colors.white,
+                    // Texto principal
+                    Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Text(
+                        _expression,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.rubik(
+                          textStyle: const TextStyle(
+                            fontSize: 64,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
                     ),
-                  )),
+                    const SizedBox(height: 24),
+
+                    // Teclado
+                    _buildButtonGrid(buttonWidth, buttonHeight),
+                  ],
                 ),
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  CalcButton(bgcolor: 0xFF00BF45,text: "AC", callback: allClear, textSize: 20),
-                  CalcButton(bgcolor: 0xFFE3303A,text: "C", callback: clear, textSize: 20),
-                  CalcButton(text: "%", callback: numClick, textSize: 20),
-                  CalcButton(text: "/", callback: numClick, textSize: 20),
-                ],
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  CalcButton(text: "7", callback: numClick, textSize: 20),
-                  CalcButton(text: "8", callback: numClick, textSize: 20),
-                  CalcButton(text: "9", callback: numClick, textSize: 20),
-                  CalcButton(text: "*", callback: numClick, textSize: 20),
-                ],
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  CalcButton(text: "4", callback: numClick, textSize: 20),
-                  CalcButton(text: "5", callback: numClick, textSize: 20),
-                  CalcButton(text: "6", callback: numClick, textSize: 20),
-                  CalcButton(text: "-", callback: numClick, textSize: 20),
-                ],
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  CalcButton(text: "1", callback: numClick, textSize: 20),
-                  CalcButton(text: "2", callback: numClick, textSize: 20),
-                  CalcButton(text: "3", callback: numClick, textSize: 20),
-                  CalcButton(text: "+", callback: numClick, textSize: 20),
-                ],
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  CalcButton(text: "0", callback: numClick, textSize: 20),
-                  CalcButton(text: "00", callback: numClick, textSize: 20),
-                  CalcButton(text: ".", callback: numClick, textSize: 20),
-                  CalcButton(text: "=", callback: evaluate, textSize: 20),
-                ],
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
+    );
+  }
+
+Widget _buildButtonGrid(double width, double height) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      _buildButtonRow(
+        ["AC", "C", "%", "/"], // ÷ → /
+        [0xFF9B9B9B, 0xFF9B9B9B, 0xFF9B9B9B, 0xFF23C1EC],
+        width,
+        height,
+      ),
+      _buildButtonRow(
+        ["7", "8", "9", "X"], // × → *
+        [0xFF333333, 0xFF333333, 0xFF333333, 0xFF23C1EC],
+        width,
+        height,
+      ),
+      _buildButtonRow(
+        ["4", "5", "6", "-"], // − → -
+        [0xFF333333, 0xFF333333, 0xFF333333, 0xFF23C1EC],
+        width,
+        height,
+      ),
+      _buildButtonRow(
+        ["1", "2", "3", "+"],
+        [0xFF333333, 0xFF333333, 0xFF333333, 0xFF23C1EC],
+        width,
+        height,
+      ),
+      _buildButtonRow(
+        ["0", ".", "="],
+        [0xFF333333, 0xFF333333, 0xFF23C1EC],
+        width,
+        height,
+        isLastRow: true,
+      ),
+    ],
+  );
+}
+
+
+  Widget _buildButtonRow(List<String> texts, List<int> colors, double width, double height, {bool isLastRow = false}) {
+    List<Widget> buttons = [];
+
+    for (int i = 0; i < texts.length; i++) {
+      bool isZero = (isLastRow && texts[i] == "0");
+
+      buttons.add(
+        Expanded(
+          flex: isZero ? 2 : 1,
+          child: Container(
+            margin: const EdgeInsets.all(6),
+            width: isZero ? width * 2 + 12 : width,
+            height: height,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: CalcButton(
+                bgcolor: colors[i],
+                text: texts[i],
+                callback: texts[i] == "AC"
+                    ? allClear
+                    : texts[i] == "C"
+                        ? clear
+                        : texts[i] == "="
+                            ? evaluate
+                            : numClick,
+                textSize: 30,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: buttons,
     );
   }
 }
